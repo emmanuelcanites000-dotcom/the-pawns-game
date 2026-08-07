@@ -1,0 +1,1275 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
+<title>The Pawns Game — Mikhail Tal</title>
+
+<style>
+:root{
+    --bg:#08080d;
+    --panel:#151522;
+    --light:#8b5cf6;
+    --dark:#1e1b4b;
+    --pink:#ec4899;
+    --cyan:#00f2ff;
+    --green:#10b981;
+    --yellow:#ffd700;
+    --red:#ef4444;
+}
+
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+    font-family:Arial,Helvetica,sans-serif;
+}
+
+html,body{
+    width:100%;
+    min-height:100%;
+}
+
+body{
+    min-height:100vh;
+    background:
+        radial-gradient(
+            circle at 50% 15%,
+            #32136d 0%,
+            #0d0d12 48%,
+            #050508 100%
+        );
+    color:#f3f4f6;
+    padding:8px;
+    overflow-x:hidden;
+}
+
+/* ================= HEADER ================= */
+
+.game-counter{
+    text-align:center;
+    color:#a78bfa;
+    font-size:.78rem;
+    margin-bottom:3px;
+}
+
+.game-counter strong{
+    color:#ffd700;
+}
+
+h1{
+    text-align:center;
+    font-size:clamp(1.4rem,5vw,2.1rem);
+    background:linear-gradient(
+        90deg,
+        #00f2ff,
+        #ec4899
+    );
+    -webkit-background-clip:text;
+    color:transparent;
+    margin-bottom:2px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#a78bfa;
+    font-size:.76rem;
+    margin-bottom:7px;
+}
+
+/* ================= DINOSAUR ================= */
+
+.dino-area{
+    width:100%;
+    max-width:850px;
+    height:48px;
+    margin:0 auto 8px;
+    position:relative;
+    overflow:hidden;
+    border-radius:11px;
+    background:
+        linear-gradient(
+            #11111c,
+            #090910
+        );
+    border:1px solid rgba(255,255,255,.08);
+}
+
+.dino-ground{
+    position:absolute;
+    left:0;
+    right:0;
+    bottom:7px;
+    height:2px;
+    background:#555;
+}
+
+.dino{
+    position:absolute;
+    left:-55px;
+    bottom:8px;
+    font-size:28px;
+    animation:
+        dinoRun 7s linear infinite;
+}
+
+@keyframes dinoRun{
+    from{
+        left:-60px;
+    }
+
+    to{
+        left:calc(100% + 60px);
+    }
+}
+
+.cloud{
+    position:absolute;
+    top:5px;
+    opacity:.25;
+    font-size:17px;
+    animation:
+        cloudMove 15s linear infinite;
+}
+
+.cloud.one{
+    left:20%;
+}
+
+.cloud.two{
+    left:70%;
+    animation-delay:-7s;
+}
+
+@keyframes cloudMove{
+    from{
+        transform:translateX(0);
+    }
+
+    to{
+        transform:translateX(-180px);
+    }
+}
+
+/* ================= CLOCK ================= */
+
+.time-bar{
+    width:100%;
+    max-width:850px;
+    margin:0 auto 8px;
+    display:flex;
+    gap:7px;
+}
+
+.time-box{
+    flex:1;
+    background:rgba(0,0,0,.42);
+    border:2px solid transparent;
+    border-radius:11px;
+    padding:6px;
+    text-align:center;
+    transition:.2s;
+}
+
+.time-box.active{
+    border-color:#ffd700;
+    box-shadow:
+        0 0 14px
+        rgba(255,215,0,.25);
+}
+
+.time-label{
+    color:#aaa;
+    font-size:.66rem;
+    margin-bottom:2px;
+}
+
+.time{
+    font-size:1.35rem;
+    font-weight:bold;
+    font-variant-numeric:tabular-nums;
+}
+
+.good{
+    color:#10b981;
+}
+
+.low{
+    color:#f59e0b;
+}
+
+.critical{
+    color:#ef4444;
+    animation:
+        clockPulse .5s infinite;
+}
+
+@keyframes clockPulse{
+    50%{
+        opacity:.4;
+    }
+}
+
+/* ================= MAIN ================= */
+
+.main-container{
+    width:100%;
+    max-width:850px;
+    margin:auto;
+    display:flex;
+    gap:12px;
+    justify-content:center;
+    flex-wrap:wrap;
+}
+
+.game-section{
+    flex:1 1 420px;
+    min-width:0;
+}
+
+.history-section{
+    flex:1 1 260px;
+    background:var(--panel);
+    border-radius:16px;
+    padding:12px;
+    border:
+        1px solid
+        rgba(255,255,255,.06);
+}
+
+/* ================= TAL ================= */
+
+.tal-profile{
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:7px;
+    background:rgba(0,0,0,.28);
+    padding:6px 9px;
+    border-radius:11px;
+}
+
+.tal-face{
+    width:39px;
+    height:39px;
+    flex:none;
+    border-radius:50%;
+    border:2px solid #ec4899;
+    background:
+        radial-gradient(
+            circle at 50% 34%,
+            #e4b48d 0 28%,
+            transparent 29%
+        ),
+        linear-gradient(
+            #292934 0 35%,
+            #e4b48d 36% 70%,
+            #222 71%
+        );
+    position:relative;
+}
+
+.tal-face:before{
+    content:"";
+    position:absolute;
+    width:6px;
+    height:5px;
+    background:#111;
+    border-radius:50%;
+    left:8px;
+    top:16px;
+    box-shadow:16px 0 #111;
+}
+
+.tal-face:after{
+    content:"";
+    position:absolute;
+    width:13px;
+    height:5px;
+    border-bottom:2px solid #111;
+    border-radius:50%;
+    left:11px;
+    top:25px;
+}
+
+.tal-name{
+    font-weight:bold;
+    font-size:.9rem;
+}
+
+.tal-title{
+    font-size:.65rem;
+    color:#aaa;
+}
+
+/* ================= STATUS ================= */
+
+.status-bar{
+    background:rgba(0,0,0,.4);
+    border-radius:9px;
+    padding:8px 11px;
+    margin-bottom:9px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-weight:bold;
+    font-size:.78rem;
+}
+
+.ai-status{
+    color:#ff4fa8;
+}
+
+.thinking{
+    color:#ffd700;
+    animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+    50%{
+        opacity:.4;
+    }
+}
+
+/* ================= BOARD ================= */
+
+.board-wrapper{
+    width:min(100%,460px);
+    margin:auto;
+    position:relative;
+    padding-left:18px;
+}
+
+#board{
+    width:100%;
+    aspect-ratio:1/1;
+    display:grid;
+    grid-template-columns:
+        repeat(8,1fr);
+    grid-template-rows:
+        repeat(8,1fr);
+    border:3px solid #4c1d95;
+    border-radius:9px;
+    overflow:hidden;
+    box-shadow:
+        0 15px 40px
+        rgba(0,0,0,.6);
+}
+
+.square{
+    position:relative;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    cursor:pointer;
+    overflow:hidden;
+}
+
+.light-sq{
+    background:var(--light);
+}
+
+.dark-sq{
+    background:var(--dark);
+}
+
+.square:hover{
+    filter:brightness(1.12);
+}
+
+.selected-sq{
+    box-shadow:
+        inset 0 0 0 3px
+        #ffd700;
+}
+
+.last-move{
+    background:
+        rgba(255,215,0,.25)
+        !important;
+}
+
+/* ================= PIECES ================= */
+
+.piece{
+    font-size:
+        clamp(
+            1.75rem,
+            7vw,
+            3rem
+        );
+    user-select:none;
+    position:relative;
+    z-index:2;
+    line-height:1;
+    transition:
+        transform .18s ease;
+}
+
+.square:hover .piece{
+    transform:scale(1.08);
+}
+
+.white-piece{
+    color:#00f2ff;
+    filter:
+        drop-shadow(
+            0 0 7px
+            rgba(0,242,255,.8)
+        );
+}
+
+.black-piece{
+    color:#ff007f;
+    filter:
+        drop-shadow(
+            0 0 7px
+            rgba(255,0,127,.75)
+        );
+}
+
+/* Smooth visual movement */
+
+.piece.moving{
+    animation:
+        pawnMove .28s
+        cubic-bezier(.2,.8,.2,1);
+}
+
+@keyframes pawnMove{
+
+    0%{
+        transform:
+            translateY(18px)
+            scale(.92);
+        opacity:.25;
+    }
+
+    60%{
+        transform:
+            translateY(-3px)
+            scale(1.05);
+        opacity:1;
+    }
+
+    100%{
+        transform:
+            translateY(0)
+            scale(1);
+    }
+}
+
+/* ================= COORDINATES ================= */
+
+.file-labels{
+    display:grid;
+    grid-template-columns:
+        repeat(8,1fr);
+    margin-left:18px;
+    margin-top:3px;
+}
+
+.file-label{
+    text-align:center;
+    color:#a78bfa;
+    font-weight:bold;
+    font-size:.7rem;
+}
+
+.rank-labels{
+    position:absolute;
+    left:0;
+    top:0;
+    height:100%;
+    width:17px;
+    display:grid;
+    grid-template-rows:
+        repeat(8,1fr);
+}
+
+.rank-label{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    color:#a78bfa;
+    font-size:.7rem;
+    font-weight:bold;
+}
+
+/* ================= CONTROLS ================= */
+
+.controls{
+    margin-top:9px;
+    display:grid;
+    grid-template-columns:
+        repeat(2,1fr);
+    gap:6px;
+}
+
+button{
+    border:none;
+    border-radius:21px;
+    padding:10px 11px;
+    min-height:42px;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+    transition:.18s;
+    font-size:.8rem;
+}
+
+button:hover{
+    transform:translateY(-2px);
+}
+
+button:active{
+    transform:scale(.96);
+}
+
+.btn-new{
+    background:
+        linear-gradient(
+            135deg,
+            #ec4899,
+            #8b5cf6
+        );
+}
+
+.btn-resign{
+    background:#ef4444;
+}
+
+.btn-sound{
+    background:#2563eb;
+}
+
+.btn-sound.off{
+    background:#374151;
+}
+
+.btn-game{
+    background:#f59e0b;
+}
+
+.btn-copy{
+    background:#10b981;
+}
+
+.btn-prev,
+.btn-next{
+    background:#374151;
+}
+
+/* ================= HISTORY ================= */
+
+.history-section h3{
+    color:#a78bfa;
+    text-align:center;
+    padding-bottom:7px;
+    margin-bottom:7px;
+    border-bottom:1px solid #333;
+    font-size:.9rem;
+}
+
+.history-list{
+    height:180px;
+    overflow-y:auto;
+    background:rgba(0,0,0,.28);
+    border-radius:9px;
+    padding:6px;
+}
+
+.move-row{
+    display:flex;
+    gap:4px;
+    margin-bottom:3px;
+}
+
+.move-number{
+    width:32px;
+    color:#777;
+    font-size:.75rem;
+    padding:5px;
+}
+
+.move-item{
+    flex:1;
+    padding:5px;
+    border-radius:5px;
+    font-family:monospace;
+    cursor:pointer;
+    font-size:.75rem;
+}
+
+.move-item:hover{
+    background:
+        rgba(139,92,246,.2);
+}
+
+.move-item.active{
+    background:
+        rgba(139,92,246,.4);
+}
+
+.white-move{
+    color:#00f2ff;
+}
+
+.black-move{
+    color:#ff007f;
+}
+
+.history-controls{
+    display:flex;
+    gap:6px;
+    margin-top:6px;
+}
+
+.history-controls button{
+    flex:1;
+}
+
+.share-area{
+    margin-top:8px;
+}
+
+.share-text{
+    width:100%;
+    min-height:80px;
+    resize:none;
+    background:#09090d;
+    color:#ddd;
+    border:1px solid #333;
+    border-radius:8px;
+    padding:7px;
+    font-size:.7rem;
+}
+
+.copied-msg{
+    display:none;
+    color:#10b981;
+    text-align:center;
+    font-size:.75rem;
+    margin-top:3px;
+}
+
+.copied-msg.show{
+    display:block;
+}
+
+/* ================= MODAL ================= */
+
+.modal{
+    display:none;
+    position:fixed;
+    inset:0;
+    z-index:1000;
+    background:rgba(0,0,0,.88);
+    align-items:center;
+    justify-content:center;
+    padding:12px;
+}
+
+.modal.show{
+    display:flex;
+}
+
+.modal-content{
+    width:100%;
+    max-width:420px;
+    background:#161622;
+    border:2px solid #8b5cf6;
+    border-radius:18px;
+    padding:20px;
+    text-align:center;
+    box-shadow:
+        0 20px 60px #000;
+}
+
+.modal h2{
+    background:
+        linear-gradient(
+            90deg,
+            #00f2ff,
+            #ec4899
+        );
+    -webkit-background-clip:text;
+    color:transparent;
+    margin-bottom:9px;
+}
+
+.modal p{
+    color:#bbb;
+    margin-bottom:12px;
+    font-size:.85rem;
+}
+
+.final-text{
+    width:100%;
+    height:120px;
+    resize:none;
+    background:#09090d;
+    color:#ddd;
+    border:1px solid #444;
+    border-radius:8px;
+    padding:7px;
+    font-size:.7rem;
+}
+
+.modal-actions{
+    display:grid;
+    grid-template-columns:
+        repeat(2,1fr);
+    gap:6px;
+    margin-top:9px;
+}
+
+/* ================= PHONE ================= */
+
+@media(max-width:600px){
+
+    body{
+        padding:
+            5px 5px
+            calc(8px + env(safe-area-inset-bottom));
+    }
+
+    h1{
+        font-size:1.35rem;
+    }
+
+    .subtitle{
+        font-size:.7rem;
+    }
+
+    .game-counter{
+        font-size:.7rem;
+    }
+
+    .dino-area{
+        height:43px;
+        margin-bottom:6px;
+    }
+
+    .dino{
+        font-size:25px;
+    }
+
+    .time-bar{
+        gap:5px;
+        margin-bottom:6px;
+    }
+
+    .time-box{
+        padding:5px;
+    }
+
+    .time-label{
+        font-size:.58rem;
+    }
+
+    .time{
+        font-size:1.15rem;
+    }
+
+    .main-container{
+        display:block;
+    }
+
+    .game-section{
+        width:100%;
+    }
+
+    .tal-profile{
+        padding:5px 7px;
+        margin-bottom:5px;
+    }
+
+    .tal-face{
+        width:34px;
+        height:34px;
+    }
+
+    .tal-name{
+        font-size:.8rem;
+    }
+
+    .tal-title{
+        font-size:.58rem;
+    }
+
+    .status-bar{
+        margin-bottom:6px;
+        padding:7px 9px;
+        font-size:.7rem;
+    }
+
+    /*
+       BOARD PRIORITY:
+       almost full phone width
+    */
+
+    .board-wrapper{
+        width:100%;
+        max-width:
+            calc(100vw - 10px);
+        padding-left:16px;
+    }
+
+    #board{
+        width:100%;
+        border-width:2px;
+        border-radius:6px;
+    }
+
+    .piece{
+        font-size:
+            clamp(
+                1.65rem,
+                10vw,
+                2.7rem
+            );
+    }
+
+    .rank-labels{
+        width:15px;
+    }
+
+    .rank-label{
+        font-size:.62rem;
+    }
+
+    .file-labels{
+        margin-left:16px;
+    }
+
+    .file-label{
+        font-size:.62rem;
+    }
+
+    /*
+       EASY TOUCH BUTTONS
+    */
+
+    .controls{
+        margin-top:7px;
+        grid-template-columns:
+            repeat(2,1fr);
+        gap:5px;
+    }
+
+    .controls button{
+        width:100%;
+        min-height:44px;
+        font-size:.73rem;
+        padding:8px 5px;
+    }
+
+    /*
+       HISTORY BELOW BOARD
+    */
+
+    .history-section{
+        width:100%;
+        margin-top:8px;
+        padding:9px;
+        border-radius:13px;
+    }
+
+    .history-section h3{
+        font-size:.8rem;
+    }
+
+    .history-list{
+        height:145px;
+    }
+
+    .history-controls button{
+        min-height:40px;
+    }
+}
+
+@media(max-width:350px){
+
+    .piece{
+        font-size:
+            clamp(
+                1.45rem,
+                9vw,
+                2.2rem
+            );
+    }
+
+    .time{
+        font-size:1rem;
+    }
+
+    .controls button{
+        font-size:.66rem;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="game-counter">
+    LABAN #<strong id="gameCount">1</strong>
+    • Oras: <strong>1+2</strong>
+    • AI: <strong>Mikhail Tal</strong>
+</div>
+
+<h1>♟️ THE PAWNS GAME ♟️</h1>
+
+<div class="subtitle">
+    Strategic Pawn Battle • 1+2 Blitz
+</div>
+
+<!-- DINOSAUR -->
+
+<div class="dino-area">
+
+    <div class="cloud one">☁️</div>
+    <div class="cloud two">☁️</div>
+
+    <div class="dino-ground"></div>
+
+    <div class="dino">
+        🦖
+    </div>
+
+</div>
+
+<!-- CLOCK -->
+
+<div class="time-bar">
+
+    <div
+        class="time-box active"
+        id="whiteBox">
+
+        <div class="time-label">
+            👤 IKAW — WHITE
+        </div>
+
+        <div
+            class="time good"
+            id="whiteTime">
+            1:00
+        </div>
+
+    </div>
+
+    <div
+        class="time-box"
+        id="blackBox">
+
+        <div class="time-label">
+            🤖 MIKHAIL TAL — BLACK
+        </div>
+
+        <div
+            class="time good"
+            id="blackTime">
+            1:00
+        </div>
+
+    </div>
+
+</div>
+
+<div class="main-container">
+
+<div class="game-section">
+
+    <!-- TAL -->
+
+    <div class="tal-profile">
+
+        <div class="tal-face"></div>
+
+        <div>
+
+            <div class="tal-name">
+                Mikhail Tal
+            </div>
+
+            <div class="tal-title">
+                🤖 The Magician • AI Opponent
+            </div>
+
+        </div>
+
+    </div>
+
+    <!-- STATUS -->
+
+    <div class="status-bar">
+
+        <div>
+            TURN:
+            <span id="turnDisplay">
+                WHITE
+            </span>
+        </div>
+
+        <div
+            class="ai-status"
+            id="aiStatus">
+            Your move
+        </div>
+
+    </div>
+
+    <!-- BOARD -->
+
+    <div class="board-wrapper">
+
+        <div class="rank-labels">
+
+            <div class="rank-label">8</div>
+            <div class="rank-label">7</div>
+            <div class="rank-label">6</div>
+            <div class="rank-label">5</div>
+            <div class="rank-label">4</div>
+            <div class="rank-label">3</div>
+            <div class="rank-label">2</div>
+            <div class="rank-label">1</div>
+
+        </div>
+
+        <div id="board"></div>
+
+    </div>
+
+    <div class="file-labels">
+
+        <div class="file-label">a</div>
+        <div class="file-label">b</div>
+        <div class="file-label">c</div>
+        <div class="file-label">d</div>
+        <div class="file-label">e</div>
+        <div class="file-label">f</div>
+        <div class="file-label">g</div>
+        <div class="file-label">h</div>
+
+    </div>
+
+    <!-- BUTTONS -->
+
+    <div class="controls">
+
+        <button
+            class="btn-new"
+            onclick="newGame()">
+            🔄 New Game
+        </button>
+
+        <button
+            class="btn-resign"
+            onclick="resignGame()">
+            🏳️ Resign
+        </button>
+
+        <button
+            class="btn-sound"
+            id="soundBtn"
+            onclick="toggleSound()">
+            🔊 Sound ON
+        </button>
+
+        <button
+            class="btn-game"
+            onclick="prepareGameText()">
+            📋 Game
+        </button>
+
+    </div>
+
+</div>
+
+<!-- HISTORY -->
+
+<div class="history-section">
+
+    <h3>
+        📜 PREVIOUS MOVES
+    </h3>
+
+    <div
+        class="history-list"
+        id="historyList">
+
+        <p
+            style="
+                text-align:center;
+                color:#666;
+            ">
+            Wala pang galaw...
+        </p>
+
+    </div>
+
+    <div class="history-controls">
+
+        <button
+            class="btn-prev"
+            onclick="previousMove()">
+            ◀ Previous
+        </button>
+
+        <button
+            class="btn-next"
+            onclick="nextMove()">
+            Next ▶
+        </button>
+
+    </div>
+
+    <div class="share-area">
+
+        <textarea
+            id="shareOutput"
+            class="share-text"
+            readonly
+            placeholder="Game moves..."></textarea>
+
+        <button
+            class="btn-copy"
+            style="
+                width:100%;
+                margin-top:5px;
+            "
+            onclick="copyHistory()">
+
+            📋 Copy Game
+
+        </button>
+
+        <div
+            class="copied-msg"
+            id="copiedMsg">
+            ✅ Nakopya na!
+        </div>
+
+    </div>
+
+</div>
+
+</div>
+
+<!-- GAME OVER -->
+
+<div
+    class="modal"
+    id="gameModal">
+
+    <div class="modal-content">
+
+        <h2 id="resultTitle">
+            GAME OVER
+        </h2>
+
+        <p id="resultMsg"></p>
+
+        <textarea
+            class="final-text"
+            id="finalGameText"
+            readonly></textarea>
+
+        <div class="modal-actions">
+
+            <button
+                class="btn-copy"
+                onclick="copyFinalGame()">
+                📋 Copy
+            </button>
+
+            <button
+                class="btn-new"
+                onclick="newGame()">
+                🔄 New Game
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
+
+<script>
+
+/* =========================================================
+   ELEMENTS
+========================================================= */
+
+const boardEl =
+    document.getElementById("board");
+
+const turnDisplay =
+    document.getElementById("turnDisplay");
+
+const aiStatus =
+    document.getElementById("aiStatus");
+
+const historyList =
+    document.getElementById("historyList");
+
+const shareOutput =
+    document.getElementById("shareOutput");
+
+const copiedMsg =
+    document.getElementById("copiedMsg");
+
+const whiteTimeEl =
+    document.getElementById("whiteTime");
+
+const blackTimeEl =
+    document.getElementById("blackTime");
+
+const whiteBox =
+    document.getElementById("whiteBox");
+
+const blackBox =
+    document.getElementById("blackBox");
+
+const gameModal =
+    document.getElementById("gameModal");
+
+const resultTitle =
+    document.getElementById("resultTitle");
+
+const resultMsg =
+    document.getElementById("resultMsg");
+
+const finalGameText =
+    document.getElementById("finalGameText");
+
+const gameCountEl =
+    document.getElementById("gameCount");
+
+const soundBtn =
+    document.getElementById("soundBtn");
+
+
+/* =========================================================
+   GAME SETTINGS
+========================================================= */
+
+const START_TIME = 60;
+
+const INCREMENT = 2;
+
+let whiteTime = START_TIME;
+
+let blackTime = START_TIME;
+
+let timer = null;
+
+let gameCount = 1;
+
+let turn = "white";
+
+let sel
