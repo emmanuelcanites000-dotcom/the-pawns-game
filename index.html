@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-    <title>The Pawns Game – Chess.com Sounds Fixed</title>
+    <title>The Pawns Game – Chess.com </title>
     <style>
         :root {
             --bg-color: #0d0d12; --panel-bg: #161622;
@@ -89,18 +89,18 @@
 </head>
 <body>
 
-    <div class="game-counter">LABAN BILANG: <strong id="gameCount">1</strong> • Oras: 30+2 • AI: Mabilis</div>
+    <div class="game-counter">MATCH: <strong id="gameCount">1</strong> • Oras: 60+2 • AI: Mabilis</div>
     <h1>♟️ THE PAWNS GAME ♟️</h1>
-    <div class="subtitle">Fixed: May tunog na ang galaw at kuha!</div>
+    <div class="subtitle"> ♟️♟️</div>
 
     <div class="time-bar">
         <div class="time-box" id="whiteBox">
             <div class="label">👤 IKAW (WHITE)</div>
-            <div class="time good" id="whiteTime">0:30</div>
+            <div class="time good" id="whiteTime">0:60</div>
         </div>
         <div class="time-box" id="blackBox">
             <div class="label">🤖 AI (BLACK)</div>
-            <div class="time good" id="blackTime">0:30</div>
+            <div class="time good" id="blackTime">0:60</div>
         </div>
     </div>
 
@@ -132,14 +132,14 @@
         </div>
 
         <div class="history-section">
-            <h3>📜 GALAW NG LARO</h3>
+            <h3>📜 GAME MOVES</h3>
             <div class="history-list" id="historyList">
-                <p style="color:#666;text-align:center;">Wala pang galaw...</p>
+                <p style="color:#666;text-align:center;">No moves yet...</p>
             </div>
             <div class="share-area">
                 <textarea id="shareOutput" class="share-text" readonly placeholder="I-click ang 'Analyze & Copy' para makuha ang buong laro..."></textarea>
-                <button class="btn-copy" onclick="copyHistory()">📋 Kopyahin</button>
-                <div class="copied-msg" id="copiedMsg">✅ Nakopya na!</div>
+                <button class="btn-copy" onclick="copyHistory()">📋 Copy</button>
+                <div class="copied-msg" id="copiedMsg">✅ Copied!</div>
             </div>
         </div>
     </div>
@@ -177,11 +177,11 @@
         const finalGameText = document.getElementById('finalGameText');
 
         // TUNOG MULA SA CHESS.COM
-        const moveAudio = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/move.mp3');
+        const moveAudio = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/move-self.mp3');
         const captureAudio = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/capture.mp3');
         const selectAudio = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/select.mp3');
         const winAudio = new Audio('https://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/notify.mp3');
-
+        const captureAudio = new Audio(' http://images.chesscomfiles.com/chess-themes/sounds/_MP3_/default/move-opponent.mp3');
         moveAudio.preload = 'auto';
         captureAudio.preload = 'auto';
         selectAudio.preload = 'auto';
@@ -265,7 +265,7 @@
         function toNotation(r,c){ const files = 'abcdefgh'; return files[c] + (8 - r); }
         
         function getGameText(){
-            if(history.length === 0) return 'Walang galaw pa.';
+            if(history.length === 0) return 'No moves yet.';
             let text = `--- LABAN ${totalGamesPlayed} ---\nOras: 30+2\n\n`;
             history.forEach((s,i)=>{
                 text += `${Math.floor(i/2)+1}. ${s.notation} `;
