@@ -323,4 +323,60 @@
             const win = checkWin(b); if(win==='white') return 100000 + depth; if(win==='black') return -100000 - depth; if(depth===0) return evaluateBoard(b);
             const moves = getAllMoves(b, isMax?'w':'b', epState); if(moves.length===0) return isMax?-99999:99999;
             moves.sort((a,b)=>{ const valA = (a.type==='capture'||a.type==='enpassant')?-200:0 + (7-a.to.r)*30; const valB = (b.type==='capture'||b.type==='enpassant')?-200:0 + (7-b.to.r)*30; return valA-valB; });
-       
+            if(isMax){ let maxEval = -Infinity; for(const m of moves){ const newEP = m.setsEnPassant ? m.setsEnPassant : null; const val = minimax(makeMove(b,m), depth-1, alpha, beta, false, newEP); maxEval = Math.max(maxEval,val); alpha = Math.max(alpha,val); if(beta<=alpha) break; } return maxEval; }
+            else { let minEval = Infinity; for(const m of moves){ const newEP = m.setsEnPassant ? m.setsEnPassant : null; const val = minimax(makeMove(b,m), depth-1, alpha, beta, true, newEP); minEval = Math.min(minEval,val); beta = Math.min(beta,val); if(beta<=alpha) break; } return minEval; }
+        }
+        function getBestMove(){ const moves = getAllMoves(currentBoard,'b', enPassantTarget); if(moves.length === 0) return null; let best = null; let bestVal = Infinity; moves.sort((a,b)=>{ const valA = (a.type==='capture'||a.type==='enpassant')?-200:0 + (7-a.to.r)*30; const valB = (b.type==='capture'||b.type==='enpassant')?-200:0 + (7-b.to.r)*30; return valA-valB; }); for(const m of moves){ const newEP = m.setsEnPassant ? m.setsEnPassant : null; const val = minimax(makeMove(currentBoard,m), MAX_DEPTH-1, -Infinity, Infinity, true, newEP); if(val < bestVal){ bestVal=val; best=m; } } return best; }
+        
+        function updateHistoryUI(){ historyList.innerHTML = ''; if(history.length === 0){ historyList.innerHTML = '<p style="color:#666;text-align:center;">Wala pang galaw...</p>'; return; } history.forEach((state, i) => { const item = document.createElement('div'); item.className = `history-item ${i%2===0?'white':'black'}`; item.textContent = `${Math.floor(i/2)+1}. ${state.notation}`; historyList.appendChild(item); }); }
+        function updateShareText(){ shareOutput.value = getGameText(); }
+        function copyHistory(){ shareOutput.select(); navigator.clipboard.writeText(shareOutput.value).then(()=>{ copiedMsg.classList.add('show'); setTimeout(()=>copiedMsg.classList.remove('show'), 2500); }); }
+        function copyFinalGame(){ finalGameText.select(); navigator.clipboard.writeText(finalGameText.value); }
+        function showAnalysis(){ finalGameText.value = getGameText(); winModal.style.display='flex'; resultTitle.textContent = '📋 ANALYSIS & GAME RECORD'; resultMsg.textContent = 'Kopyahin mo ang laro para itago o ipadala sa iba.'; }
+        function closeModal(){ winModal.style.display='none'; }
+        function startNewGame(){ closeModal(); totalGamesPlayed++; gameCountEl.textContent = totalGamesPlayed; initBoard(); }
+        function resetGame(){ if(confirm('Sigurado ka bang magsisimula ulit?')) startNewGame(); }
+
+        function checkDraw(){ const color = turn==='white'?'w':'b'; if(!hasAnyMoves(currentBoard, color, enPassantTarget)){ gameOver = true; stopTimer(); showDraw(); return true; } return false; }
+        function updateUI(){ boardEl.innerHTML=''; turnDisplay.textContent = turn.toUpperCase(); turnDisplay.style.color = turn==='white'?'#00f2ff':'#ff007f'; for(let r=0;r<8;r++) for(let c=0;c<8;c++){ const sq=document.createElement('div'); sq.className=`square ${(r+c)%2===0?'light-sq':'dark-sq'}`; if(selected && selected.r===r && selected.c===c) sq.classList.add('selected-sq'); const hint = validMoves.find(m=>m.to.r===r&&m.to.c===c); if(hint){ const h=document.createElement('div'); h.className=(hint.type==='capture'||hint.type==='enpassant')?'capture-indicator':'move-indicator'; sq.appendChild(h); } const p=currentBoard[r][c]; if(p){ const pc=document.createElement('div'); pc.className=`piece ${p==='w'?'white-piece':'black-piece'}`; pc.textContent='♙'; sq.appendChild(pc); } if(!gameOver) sq.onclick=()=>click(r,c); boardEl.appendChild(sq); } }
+        function click(r,c){ if(gameOver) return; const p=currentBoard[r][c]; const mv = validMoves.find(m=>m.to.r===r&&m.to.c===c); if(mv){ const from = toNotation(mv.from.r, mv.from.c); const to = toNotation(mv.to.r, mv.to.c); let notation; if(mv.type==='enpassant') notation = `${from}x${to} e.p.`; else if(mv.type==='capture') notation = `${from}x${to}`; else notation = `${from}-${to}`; doMove(mv, notation); if(!gameOver && !checkDraw()) setTimeout(runAi, 300); } else if(p==='w'){ selected={r,c}; validMoves=getMoves(currentBoard,r,c,'w'); playSound('select');
+        } else { selected=null; validMoves=[]; } updateUI(); }
+        
+        // ✅ INAYOS NA PAGTATAWAG NG TUNOG
+        function doMove(move, notation){ 
+            currentBoard = makeMove(currentBoard,move); 
+            // Hiwalay na pagtukoy para siguradong tutunog
+            if(move.type==='capture' || move.type==='enpassant'){
+                playSound('capture');
+            }else{
+                playSound('move');
+            }
+            enPassantTarget = move.setsEnPassant ? move.setsEnPassant : null; 
+            addTime(turn); 
+            const winner = checkWin(currentBoard); 
+            if(winner){ 
+                gameOver=true; 
+                stopTimer(); 
+                playSound('win'); 
+                showWin(winner); 
+            } else { 
+                turn = turn==='white'?'black':'white'; 
+                selected=null; 
+                validMoves=[]; 
+            } 
+            saveState(notation); 
+        }
+        
+        function runAi(){ isAiThinking=true; aiStatus.innerHTML='<span class="thinking">THINKING...</span>'; setTimeout(()=>{ if(checkDraw()){ isAiThinking=false; updateUI(); return; } const best = getBestMove(); if(best){ const from = toNotation(best.from.r, best.from.c); const to = toNotation(best.to.r, best.to.c); let notation; if(best.type==='enpassant') notation = `${from}x${to} e.p.`; else if(best.type==='capture') notation = `${from}x${to}`; else notation = `${from}-${to}`; doMove(best, notation); aiStatus.textContent='Ready'; if(!gameOver) checkDraw(); } else { gameOver=true; stopTimer(); showDraw(); } isAiThinking=false; updateUI(); },200); }
+        function showWin(who){ resultTitle.textContent = who==='white'?'🏆 PANALO KA!':'😔 PANALO ANG AI!'; resultTitle.style.color = who==='white'?'#00f2ff':'#ff007f'; resultMsg.textContent = 'Nasa ibaba ang buong record ng laro mo – pwede mo itong kopyahin.'; finalGameText.value = getGameText(); winModal.style.display='flex'; }
+        function showDraw(){ resultTitle.textContent = '🤝 TABLA!'; resultTitle.style.color = '#f59e0b'; resultMsg.textContent = 'Pantay ang laban! Nasa ibaba ang record ng laro.'; finalGameText.value = getGameText(); winModal.style.display='flex'; }
+
+        document.addEventListener('click', ()=>{
+            moveAudio.play().then(() => moveAudio.pause()).catch(()=>{});
+        }, { once: true });
+
+        initBoard();
+    </script>
+
+</body>
+</html>
