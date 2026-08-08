@@ -89,8 +89,8 @@
 </head>
 <body>
 
-    <div class="game-counter">LABAN BILANG: <strong id="gameCount">1</strong> • Oras: 10+2 • AI: Mabilis</div>
-    <h1>♟️ THE PAWNS GAME ♟️</h1>
+    <div class="game-counter">LABAN BILANG: <strong id="gameCount">1</strong> • Oras: 10:00 • AI: Mabilis</div>
+    <h1>♟️ THE PAWNS GAME♟️</h1>
     <div class="subtitle">Fixed: What's Up mga kupals🫡!</div>
 
     <div class="time-bar">
@@ -229,8 +229,8 @@
         let timerInterval = null;
 
         function formatTime(secs){
-            const m = Math.floor(secs / 60);
-            const s = Math.floor(secs % 60);
+            const m = Math.floor(mins / 10);
+            const s = Math.floor(mins % 10);
             return `${m}:${s.toString().padStart(2,'0')}`;
         }
 
@@ -266,7 +266,7 @@
         
         function getGameText(){
             if(history.length === 0) return 'No moves.';
-            let text = `--- LABAN ${totalGamesPlayed} ---\nOras: 10+2\n\n`;
+            let text = `--- LABAN ${totalGamesPlayed} ---\nOras: 10mins\n\n`;
             history.forEach((s,i)=>{
                 text += `${Math.floor(i/2)+1}. ${s.notation} `;
                 if(i%2===1) text += '\n';
@@ -291,7 +291,7 @@
             updateUI();
             updateTimeDisplay();
             updateShareText();
-            setTimeout(startTimer, 500);
+            setTimeout(startTimer, 600);
         }
 
         function hasAnyMoves(b,color,epTarget=null){
